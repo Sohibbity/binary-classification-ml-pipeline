@@ -1,5 +1,8 @@
-
+from pathlib import Path
 from shutil import copyfile
+
+from Config.Constants import INPUT_DATA_DIR
+
 
 class DataRetriever:
     """
@@ -8,5 +11,6 @@ class DataRetriever:
     """
 
     @staticmethod
-    def load_data(source_file_path: str, output_file_path: str):
-        copyfile(source_file_path, output_file_path)
+    def load_data(source_file_path: Path, output_file_path: Path):
+        destination = INPUT_DATA_DIR / output_file_path
+        copyfile(source_file_path, destination)

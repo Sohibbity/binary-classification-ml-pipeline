@@ -1,6 +1,21 @@
+from pathlib import Path
+DATA_DIR = Path("/Users/soheeb/PycharmProjects/BinaryClassifier/Data")
+INPUT_DATA_DIR = DATA_DIR / "InputData"
+EVALUATED_DATA_DIR = DATA_DIR / "EvaluatedData"
+
 # Data Ingestion
-DATA_SOURCE_PATH = '/Users/soheeb/Desktop/uci_bank_marketing/bank/bank-full.csv'
-OUTPUT_FILE_PATH = '/Users/soheeb/PycharmProjects/BinaryClassifier/Data/bank-full.csv'
+TRAINING_DATA_SOURCE_PATH = Path("/Users/soheeb/Desktop/uci_bank_marketing/bank/bank-full.csv")
+TRAINING_DATA_OUTPUT_FILE_PATH = "bank-full.csv"   # <-- relative, good
+
+# Model Eval
+EVAL_DATA_SOURCE_PATH = Path("/Users/soheeb/Desktop/uci_bank_marketing/bank/bank.csv")
+EVAL_DATA_OUTPUT_PATH = "bank.csv"  # <-- relative
+
+# Evaluated Data Output Paths
+test = '/Users/soheeb/PycharmProjects/BinaryClassifier/Data/EvaluatedData'
+
+
+
 
 # General Constants
 Y_AXIS = 'y'

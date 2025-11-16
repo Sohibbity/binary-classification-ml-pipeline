@@ -1,6 +1,8 @@
+from pathlib import Path
+
 import pandas as pd
 
-from Config.Constants import Y_AXIS
+from Config.Constants import Y_AXIS, INPUT_DATA_DIR
 
 
 class PreProcessor:
@@ -12,7 +14,7 @@ class PreProcessor:
     """
 
     @staticmethod
-    def preprocess_csv(file_path:str):
+    def preprocess_csv(file_path: Path):
         df = pd.read_csv(file_path, sep=";", quotechar='"')
         # drop duration - in documentation
         df = df.drop('duration', axis = 1)
