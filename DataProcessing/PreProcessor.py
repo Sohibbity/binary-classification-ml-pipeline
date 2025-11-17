@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import pandas as pd
+from pandas import DataFrame
 
 from Config.Constants import Y_AXIS, INPUT_DATA_DIR
 
@@ -13,10 +14,39 @@ class PreProcessor:
     For data schema please see: https://archive.ics.uci.edu/dataset/222/bank+marketing
     """
 
+    """
+    Chunk Preprocess for larger data sets in blob storage 
+    Use this for Production Pipelines
+    """
     @staticmethod
-    def preprocess_csv(file_path: Path):
+    def preprocess_chunk(raw_df: DataFrame) -> DataFrame:
+        # drop duration - Specified in dataset documentation: https://archive.ics.uci.edu/dataset/222/bank+marketing
+        raw_df = raw_df.drop('duration', axis = 1)
+
+        # convert y/no to binary
+
+        raw_df[Y_AXIS] = raw_df[Y_AXIS].map({'no': 0, 'yes': 1})
+        raw_df['default'] = raw_df['default'].map({'no': 0, 'yes': 1})
+        raw_df['housing'] = raw_df['housing'].map({'no': 0, 'yes': 1})
+        raw_df['loan'] = raw_df['loan'].map({'no': 0, 'yes': 1})
+
+        features = ['age', 'balance', 'campaign', 'pdays', 'previous', 'default', 'housing', 'loan']
+        X = raw_df[features]
+        y = raw_df[Y_AXIS]
+
+        numeric_df = pd.concat([X, y], axis=1)
+        numeric_df.drop('y', axis=1, inplace= True)
+
+        return numeric_df
+
+    """
+    Static Preprocess entire file on Disk
+    Use this for LocalPipeline
+    """
+    @staticmethod
+    def preprocess_csv(file_path: Path) -> DataFrame:
         df = pd.read_csv(file_path, sep=";", quotechar='"')
-        # drop duration - in documentation
+        # drop duration - Specified in dataset documentation: https://archive.ics.uci.edu/dataset/222/bank+marketing
         df = df.drop('duration', axis = 1)
 
         # convert y/no to binary

@@ -15,6 +15,12 @@ EVAL_DATA_OUTPUT_PATH = "bank.csv"  # <-- relative
 test = '/Users/soheeb/PycharmProjects/BinaryClassifier/Data/EvaluatedData'
 
 
+# AWS
+
+S3_BUCKET_NAME = 'ml-inference-data-soheeb'
+S3_DIR_FOR_INPUT_EVAL_DATA = 'input_eval_data'
+S3_DIR_FOR_PREDICTIONS = 'output_predictions'
+
 
 
 # General Constants

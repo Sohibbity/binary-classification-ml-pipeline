@@ -2,10 +2,10 @@ from pathlib import Path
 
 import torch
 
-from ModelBuilding.BinaryClassifierModel import BinaryClassifierModel
+from Model.BinaryClassifierModel import BinaryClassifierModel
 
 
-class ModelRetriever():
+class ModelRetriever:
     """
     Creates model from stored .pth file
     """

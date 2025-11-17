@@ -7,7 +7,7 @@ import torch
 from Config.Constants import EVAL_DATA_OUTPUT_PATH, \
     EVALUATED_DATA_DIR, INPUT_DATA_DIR
 from DataProcessing.PreProcessor import PreProcessor
-from ModelBuilding.ModelRetriever import ModelRetriever
+from Model.ModelRetriever import ModelRetriever
 
 
 class InferencePipeline:
@@ -22,10 +22,10 @@ class InferencePipeline:
         model.eval()
 
         # preprocess data
-        processed_df = PreProcessor.preprocess_csv(Path(INPUT_DATA_DIR / self.input_data))
+        preprocessed_df = PreProcessor.preprocess_csv(Path(INPUT_DATA_DIR / self.input_data))
         # Sample data contains prepopulated y, hence drop target column
 
-        x = processed_df.drop('y', axis=1)
+        x = preprocessed_df.drop('y', axis=1)
         x_tensor = torch.FloatTensor(x.values)
 
         #  CAll Model on dataset

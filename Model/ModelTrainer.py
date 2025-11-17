@@ -6,7 +6,7 @@ from torch import nn, optim
 
 from Config.Constants import Model_OUTPUT_PATH, Y_AXIS, X_AXIS
 from DataModels.Tensors import Tensors
-from ModelBuilding.BinaryClassifierModel import BinaryClassifierModel
+from Model.BinaryClassifierModel import BinaryClassifierModel
 
 class ModelTrainer:
     """
