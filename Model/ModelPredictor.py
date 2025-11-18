@@ -11,7 +11,14 @@ class ModelPredictor:
     def __init__(self, model: BinaryClassifierModel):
         self.model = model
 
-
+    # Defensability Analysis:
+    # this is local rn but imagine it was an endpoint
+    # Issues that warrant a retry:
+    # network con to endppint dropped
+    # model cpu limit exceeded, (yes we're chunking but maybe this time our file has the same number of rows, BUT each row is more
+    # densley occuipied i.e if we had a synopsis col, previously col avg chars was 100, but we didnt realize this file its 5k char each, would
+    # blow up model cpu
+    # model inference is idempotent (all or nothing) so we retry 3x or drop from the entire batch of results
     def run_inference(self, input_df: DataFrame):
         self.model.eval()
 

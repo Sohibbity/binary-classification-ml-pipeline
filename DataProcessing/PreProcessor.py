@@ -18,6 +18,10 @@ class PreProcessor:
     Chunk Preprocess for larger data sets in blob storage 
     Use this for Production Pipelines
     """
+    # Defensability analysis:
+    # formatting issue, what if the no/yes mapping is incorrect
+    # doesn't make sense to retry, but what do we do
+    # drop the entire chunk? or is there a way to find the 'offending rows' and retry the remaining rows within the chunk
     @staticmethod
     def preprocess_chunk(raw_df: DataFrame) -> DataFrame:
         # drop duration - Specified in dataset documentation: https://archive.ics.uci.edu/dataset/222/bank+marketing

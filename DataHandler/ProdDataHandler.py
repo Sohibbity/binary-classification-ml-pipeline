@@ -28,6 +28,10 @@ class ProdDataHandler:
         """
         self.s3_client.download_file(bucket, key , local_path)
 
+    # Defensability Analysis:
+    # why would write to s3 fail? - these are 99.9999% time due to network issues
+    # i.e con dropped/timeout.
+    # simply retry on netowrk issues
     def stream_write_file(self, bucket:str, key: str, df: DataFrame, chunk_id : int):
         """
         Writes a single chunk to S3.
@@ -37,7 +41,7 @@ class ProdDataHandler:
 
         # Convert DF to writable CSV
         csv_buffer = io.StringIO()
-        df.to_csv(csv_buffer, index=True) # i think index = true means the index is for each
+        df.to_csv(csv_buffer, index=True)
         df_as_csv = csv_buffer.getvalue()
 
         # Create unique key for this chunk
