@@ -30,3 +30,8 @@ X_AXIS = 'x'
 # Model Training
 DF_ROWS = 8
 Model_OUTPUT_PATH = '/Users/soheeb/PycharmProjects/BinaryClassifier/Models/model-v1.pth'
+
+# Model names:
+
+# Initial 2-MLP Model used for binary classification of predicting subscriber sign ups
+MODEL_V1 = 'model-v1'
