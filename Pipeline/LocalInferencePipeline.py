@@ -11,6 +11,11 @@ from Model.ModelRetriever import ModelRetriever
 
 
 class InferencePipeline:
+    """
+    Local inference pipeline for model evaluation and testing.
+    Runs a localized version of the prod pipeline
+    Use this for debugging/testing/model eval
+    """
     def __init__(self, model_path: Path, input_data: Path):
         self.model_path = model_path
         self.input_data = input_data

@@ -1,7 +1,5 @@
 import io
 import logging
-import time
-from datetime import datetime
 
 import pandas as pd
 
@@ -15,6 +13,25 @@ logger = logging.getLogger(__name__)
 
 
 class ProdInferencePipeline:
+    """
+    Production inference pipeline prototype demonstrating S3 streaming and batch processing.
+
+    Note: This is a monolithic implementation that mixes orchestration and business logic.
+    In a mature production system, these steps will be decomposed into separate Airflow tasks:
+        - Task 1: Stream & preprocess chunks
+        - Task 2: Run model inference
+        - Task 3: Write predictions to S3
+
+    Each task would run on isolated worker pools with independent retry mechanisms and
+    monitoring. This prototype establishes the core pipeline logic before adding orchestration.
+
+    Completed: S3 Streaming
+    Pending: Model Inference via dedicated Sagemaker Inference Endpoints
+    TODO: Set up Postgres for storage and versioning of model outputs
+    TODO: Migrate to Airflow for task orchestration
+    TODO: Implement model performance monitoring and drift detection
+    TODO: Add alerting for SLA breaches and pipeline failures
+    """
     def __init__(
             self,
             prod_data_retriever: ProdDataHandler,
@@ -39,17 +56,8 @@ class ProdInferencePipeline:
         failed_chunks = []
         successful_chunks = []
         for chunk_id, chunk in enumerate(chunked_reader, start=1):
-            """
-            This is scrappy (AND TEMPORARY!), and is simply to bridge the gap 
-            between an ideal system in production and this prototype
-            Under ideal circumstances these are air flow tasks spun up on a worker pool
-            failed batches are retried on a separate pool 
-            and SLA is calculated periodically, 
-            if too many tasks fail then independent task retry is useless 
-            In that case the entire pipeline must be restarted 
-            TODO: Explore airflow dag setup, as singular task = chunk of operations or 1 task = 1 specific operation
-            i.e 1 task for preprocessing, 1 task for inference, 1 task for writing to s3, or 1 task  for all 3
-            """
+            # Prime example of why we don't mix orchestration logic with business logic
+            # TBD Airflow
             early_abort_threshold = 0.9 # sla is .98, tuned slightly below to prevent pre-emptively aborting workflow
             check_interval = 5
             try:

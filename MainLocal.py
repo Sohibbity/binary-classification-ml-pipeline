@@ -8,7 +8,7 @@ from Pipeline.LocalInferencePipeline import InferencePipeline
 pd.set_option('display.max_columns', None)
 pd.set_option('display.width', 1000)
 
-def mainlocal():
+def main_local():
     print("hello world")
     # 'Data Ingestion'
     DataRetriever.load_data(
@@ -26,4 +26,4 @@ def mainlocal():
     inference_pipeline.pipeline()
 
 if __name__ == "__main__":
-    mainlocal()
+    main_local()

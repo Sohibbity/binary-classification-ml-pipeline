@@ -1,8 +1,7 @@
 from datetime import datetime
 
 from Clients.ClientFactory import ClientFactory
-from Config.Constants import S3_BUCKET_NAME, S3_DIR_FOR_INPUT_EVAL_DATA, DATA_DIR, EVALUATED_DATA_DIR, INPUT_DATA_DIR, \
-    Model_OUTPUT_PATH, S3_DIR_FOR_PREDICTIONS
+from Config.Constants import Model_OUTPUT_PATH
 from Config.LoggingConfig import configure_logging
 from DataHandler.ProdDataHandler import ProdDataHandler
 from Model.ModelPredictor import ModelPredictor
@@ -11,7 +10,7 @@ from Pipeline.ProdInferencePipeline import ProdInferencePipeline
 
 
 
-def mainproduction():
+def main_production():
     print("hello world")
     configure_logging()
     client_factory = ClientFactory()
@@ -32,4 +31,4 @@ def mainproduction():
 
 
 if __name__ == "__main__":
-    mainproduction()
+    main_production()
