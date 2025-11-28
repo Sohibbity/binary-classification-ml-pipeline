@@ -1,5 +1,7 @@
 import io
+import json
 import logging
+from datetime import datetime
 
 import pandas as pd
 
@@ -8,6 +10,7 @@ from DataProcessing.PreProcessor import PreProcessor
 from DataHandler.ProdDataHandler import ProdDataHandler
 from Model import ModelPredictor
 from Utils.Utils import log_stage, log_retry, log_chunk_failure
+from sagemaker_deploy.DeploySagemakerEndpoint import ENDPOINT_NAME
 
 logger = logging.getLogger(__name__)
 
@@ -35,11 +38,13 @@ class ProdInferencePipeline:
     def __init__(
             self,
             prod_data_retriever: ProdDataHandler,
-            model_predictor: ModelPredictor
+            model_predictor: ModelPredictor,
+            sagemaker_runtime_client
 
     ):
         self.prod_data_retriever = prod_data_retriever
         self.model_predictor = model_predictor
+        self.sagemaker_runtime_client = sagemaker_runtime_client
 
     def prod_pipeline(self, s3_input_file_name: str, s3_predictions_output_file_name: str):
         # Creates Stream of input file for model eval
@@ -58,7 +63,7 @@ class ProdInferencePipeline:
         for chunk_id, chunk in enumerate(chunked_reader, start=1):
             # Prime example of why we don't mix orchestration logic with business logic
             # TBD Airflow
-            early_abort_threshold = 0.9 # sla is .98, tuned slightly below to prevent pre-emptively aborting workflow
+            early_abort_threshold = 0.0 # sla is .98, tuned slightly below to prevent pre-emptively aborting workflow
             check_interval = 5
             try:
                 pre_processed_chunk = PreProcessor.preprocess_chunk(chunk)
@@ -75,7 +80,38 @@ class ProdInferencePipeline:
                 try:
                     if chunk_id % 10 == 0:
                         raise ValueError('simulating failed chunk')
-                    chunked_predictions = self.model_predictor.run_inference(input_df=pre_processed_chunk)
+
+                    formatted_for_inference = pre_processed_chunk.values.tolist()
+                    payload = json.dumps(formatted_for_inference)
+                    print(f'type: {type(payload)}')
+                    print('Begin inference chunks')
+                    print(f'122201, payload: {payload}')
+                    print('---------------------------------------------------------')
+                    # chunked_predictions = self.model_predictor.run_inference(input_df=pre_processed_chunk)
+                    # print(f'1001.1 chunked_pred {chunked_predictions}')
+
+                    print(f"Calling endpoint: {ENDPOINT_NAME}")
+                    print(f"Payload: {payload}")
+
+                    # Invoke endpoint
+                    inference_predictions = self.sagemaker_runtime_client.invoke_endpoint(
+                        EndpointName=ENDPOINT_NAME,
+                        ContentType='application/json',
+                        Accept='application/json',
+                        Body=payload
+                    )
+
+                    result = json.loads(inference_predictions['Body'].read().decode())
+
+                    # Create DataFrame (matching your local format)
+                    chunked_predictions = pd.DataFrame({
+                        'prediction': result['predictions'],
+                        'confidences': result['confidences'],
+                        'timestamp': datetime.now().isoformat(),
+                        'model_version': 'v1.0.0.0'
+                    })
+                    chunked_predictions.index.name = 'input_row_id'
+
 
                     self.prod_data_retriever.stream_write_file(
                         bucket=S3_BUCKET_NAME,

@@ -20,3 +20,8 @@ class ClientFactory:
     @cached_property
     def sagemaker_client(self):
         return boto3.client('sagemaker', region_name = 'us-east-2')
+
+    @cached_property
+    def sagemaker_runtime_client(self):
+        return boto3.client('sagemaker-runtime', region_name = 'us-east-2')
+

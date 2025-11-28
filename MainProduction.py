@@ -22,12 +22,14 @@ def main_production():
     model_predictor = ModelPredictor(ModelRetriever().load_model(stored_model_file_path=Model_OUTPUT_PATH))
 
     # ML Pipeline
-    prod_inference_pipeline = ProdInferencePipeline(prod_data_retriever,model_predictor)
+    prod_inference_pipeline = ProdInferencePipeline(prod_data_retriever,model_predictor, client_factory.sagemaker_runtime_client)
 
-    s3_input_file_name = 'bank.csv'
+    s3_input_file_name = 'bank_small.csv'
     s3_predictions_output_file_name = f"{s3_input_file_name}-{datetime.now().isoformat()}"
 
     prod_inference_pipeline.prod_pipeline(s3_input_file_name,s3_predictions_output_file_name)
+
+
 
 
 if __name__ == "__main__":
