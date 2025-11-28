@@ -16,3 +16,7 @@ class ClientFactory:
     @cached_property
     def s3_client(self):
         return boto3.client('s3')
+
+    @cached_property
+    def sagemaker_client(self):
+        return boto3.client('sagemaker', region_name = 'us-east-2')
