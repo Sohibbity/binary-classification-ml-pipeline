@@ -1,7 +1,9 @@
 from Clients.ClientFactory import ClientFactory
 
 # Configuration
+
 # TODO - extract to unified constants file, being scrappy in the time being.
+# TODO - Refactor into manual execution build script for deployment
 
 MODEL_DATA = 's3://ml-inference-data-soheeb/models/model.tar.gz'
 REGION = 'us-east-1'

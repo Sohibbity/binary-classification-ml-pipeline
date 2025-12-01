@@ -43,6 +43,7 @@ class ProdInferencePipeline:
         self.prod_data_retriever = prod_data_retriever
         self.sagemaker_runtime_client = sagemaker_runtime_client
 
+    # Todo: Create Decorators to separate out retry logic from prediction generation
     def prod_pipeline(self, s3_input_file_name: str, s3_predictions_output_file_name: str):
         # Creates Stream of input file for model eval
 
