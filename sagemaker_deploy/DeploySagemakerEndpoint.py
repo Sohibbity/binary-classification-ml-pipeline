@@ -2,7 +2,7 @@ from Clients.ClientFactory import ClientFactory
 
 # Configuration
 # TODO - extract to unified constants file, being scrappy in the time being.
-ROLE_ARN = 'arn:aws:iam::261270336995:role/sagemaker-exec-role'
+
 MODEL_DATA = 's3://ml-inference-data-soheeb/models/model.tar.gz'
 REGION = 'us-east-1'
 INSTANCE_TYPE = 'ml.t2.medium'

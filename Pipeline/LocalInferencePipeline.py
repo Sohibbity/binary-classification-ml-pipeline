@@ -1,52 +1,35 @@
 from datetime import datetime
 from pathlib import Path
 
-import pandas as pd
 import torch
 
 from Config.Constants import EVAL_DATA_OUTPUT_PATH, \
     EVALUATED_DATA_DIR, INPUT_DATA_DIR
-from DataProcessing.PreProcessor import PreProcessor
-from Model.ModelRetriever import ModelRetriever
+from ETL.PreProcessor import PreProcessor
+from Model.ModelPredictor import ModelPredictor
 
 
-class InferencePipeline:
+class LocalInferencePipeline:
     """
     Local inference pipeline for model evaluation and testing.
     Runs a localized version of the prod pipeline
     Use this for debugging/testing/model eval
     """
-    def __init__(self, model_path: Path, input_data: Path):
-        self.model_path = model_path
+    def __init__(self, input_data: Path, model_predictor: ModelPredictor):
         self.input_data = input_data
-
+        self.model_predictor = model_predictor
 
     def pipeline(self):
-        # load model
-        model = ModelRetriever().load_model(stored_model_file_path = self.model_path)
-        model.eval()
 
-        # preprocess data
-        preprocessed_df = PreProcessor.preprocess_csv(Path(INPUT_DATA_DIR / self.input_data))
-        # Sample data contains prepopulated y, hence drop target column
+        # Preprocess data:
+        # Drop Y column (prediction)
+        # Convert remaining df to tensors
+        preprocessed_df = ((PreProcessor.preprocess_csv(Path(INPUT_DATA_DIR / self.input_data)))
+                           .drop('y', axis=1))
 
-        x = preprocessed_df.drop('y', axis=1)
-        x_tensor = torch.FloatTensor(x.values)
+        x_tensor = torch.FloatTensor(preprocessed_df.values)
 
-        #  CAll Model on dataset
-        with torch.no_grad():
-            outputs = model(x_tensor) # generates raw, model output
-            # Get probabilities and predictions
-            probabilities = torch.softmax(outputs, dim=1)  # Convert to probabilities
-            predictions = torch.argmax(probabilities, dim=1)  # Get predicted class (0 or 1)
-            confidences = torch.max(probabilities, dim=1).values  # Get confidence score
-
-        results = pd.DataFrame({
-            'prediction': predictions.numpy(),
-            'confidences': confidences,
-            'timestamp': datetime.now().isoformat(),
-            'model_version': 'v1.0.0.0'
-        })
+        results = self.model_predictor.run_local_inference(x_tensor)
 
         results.index.name = 'input_row_id'
 
@@ -60,6 +43,3 @@ class InferencePipeline:
         output_csv_path = Path(EVALUATED_DATA_DIR) / final_filename
         results.to_csv(output_csv_path, index=True)
         print(f"Predictions saved to {output_csv_path}")
-
-
-

@@ -1,12 +1,18 @@
+from typing import TypedDict
 
 from pandas import DataFrame
 import torch
 from sklearn.model_selection import train_test_split
 from torch import nn, optim
 
-from Config.Constants import Model_OUTPUT_PATH, Y_AXIS, X_AXIS
-from DataModels.Tensors import Tensors
+from Config.Constants import Model_OUTPUT_PATH, Y_AXIS
 from Model.BinaryClassifierModel import BinaryClassifierModel
+
+class Tensors(TypedDict):
+    x_train_tensor: torch.FloatTensor
+    x_test_tensor: torch.FloatTensor
+    y_train_tensor: torch.LongTensor
+    y_test_tensor: torch.LongTensor
 
 class ModelTrainer:
     """

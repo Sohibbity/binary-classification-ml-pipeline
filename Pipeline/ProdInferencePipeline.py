@@ -6,9 +6,8 @@ from datetime import datetime
 import pandas as pd
 
 from Config.Constants import S3_BUCKET_NAME, S3_DIR_FOR_INPUT_EVAL_DATA, S3_DIR_FOR_PREDICTIONS
-from DataProcessing.PreProcessor import PreProcessor
-from DataHandler.ProdDataHandler import ProdDataHandler
-from Model import ModelPredictor
+from ETL.PreProcessor import PreProcessor
+from ETL.ProdDataHandler import ProdDataHandler
 from Utils.Utils import log_stage, log_retry, log_chunk_failure
 from sagemaker_deploy.DeploySagemakerEndpoint import ENDPOINT_NAME
 
@@ -38,12 +37,10 @@ class ProdInferencePipeline:
     def __init__(
             self,
             prod_data_retriever: ProdDataHandler,
-            model_predictor: ModelPredictor,
             sagemaker_runtime_client
 
     ):
         self.prod_data_retriever = prod_data_retriever
-        self.model_predictor = model_predictor
         self.sagemaker_runtime_client = sagemaker_runtime_client
 
     def prod_pipeline(self, s3_input_file_name: str, s3_predictions_output_file_name: str):
@@ -83,15 +80,6 @@ class ProdInferencePipeline:
 
                     formatted_for_inference = pre_processed_chunk.values.tolist()
                     payload = json.dumps(formatted_for_inference)
-                    print(f'type: {type(payload)}')
-                    print('Begin inference chunks')
-                    print(f'122201, payload: {payload}')
-                    print('---------------------------------------------------------')
-                    # chunked_predictions = self.model_predictor.run_inference(input_df=pre_processed_chunk)
-                    # print(f'1001.1 chunked_pred {chunked_predictions}')
-
-                    print(f"Calling endpoint: {ENDPOINT_NAME}")
-                    print(f"Payload: {payload}")
 
                     # Invoke endpoint
                     inference_predictions = self.sagemaker_runtime_client.invoke_endpoint(
@@ -122,7 +110,7 @@ class ProdInferencePipeline:
                     chunk_succeeded = True
                     break
                 except Exception as e:
-                    log_retry('Predictions failed to write to s3', chunk_id, r, max_attempts = 3)
+                    log_retry('Predictions failed to write to s3', chunk_id, r, max_attempts = 3, exception = e)
 
             if chunk_succeeded:
                 log_stage(f"Writing Predictions to S3", chunk_id)

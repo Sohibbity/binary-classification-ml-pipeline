@@ -4,7 +4,7 @@ from shutil import copyfile
 from Config.Constants import INPUT_DATA_DIR
 
 
-class DataRetriever:
+class LocalDataHandler:
     """
     Currently loads from a locally stored csv file.
     Production ready would load from a blob storage source (i.e AWS S3)

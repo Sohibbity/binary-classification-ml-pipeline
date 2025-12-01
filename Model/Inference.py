@@ -7,15 +7,36 @@ import torch
 from Config.Constants import MODEL_V1
 from Model.BinaryClassifierModel import BinaryClassifierModel
 
+"""
+SageMaker Inference Script
+
+This module implements the required SageMaker inference handlers:
+`model_fn`, `input_fn`, `predict_fn`, and `output_fn`. Defines contract
+for receiving payload, generating predictions, and response output
+
+Contract Summary:
+- model_fn(model_dir):                   Loads the trained model from the model artifact directory.
+- input_fn(request_body, content_type):  Converts incoming payloads into model-ready tensors.
+- predict_fn(input_data, model):         Runs forward inference and formats prediction outputs.
+- output_fn(prediction, accept):         Serializes outputs into the response format.
+
+This endpoint expects JSON payloads where the request body contains a
+list-of-lists of numeric feature values. All model outputs are returned
+as JSON-compatible lists.
+
+For more information, see docs here https://tinyurl.com/inferenececontract
+"""
+
+
 class PredictionResult(TypedDict):
     probabilities: torch.Tensor
     predictions: torch.Tensor
     confidences: torch.Tensor
 
 
-def model_fn(model_dir,):
-    model = BinaryClassifierModel(input_size = 8)
-    model_path = os.path.join(model_dir,f'{MODEL_V1}.pth')
+def model_fn(model_dir, ):
+    model = BinaryClassifierModel(input_size=8)
+    model_path = os.path.join(model_dir, f'{MODEL_V1}.pth')
     model.load_state_dict(torch.load(model_path))
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model.to(device)
@@ -36,6 +57,7 @@ def input_fn(request_body, request_content_type):
         raise ValueError(f"Unsupported content type: {request_content_type} "
                          f"This endpoint currently only supports JSON")
 
+
 def predict_fn(input_data, model) -> PredictionResult:
     # Determine model on Loc on host (gpu i.e cuda vs cpu)
     device = next(model.parameters()).device
@@ -50,13 +72,14 @@ def predict_fn(input_data, model) -> PredictionResult:
         predictions = torch.argmax(probabilities, dim=1)  # Get predicted class (0 or 1)
         confidences = torch.max(probabilities, dim=1).values  # Get confidence score
 
-        result: PredictionResult =  {
+        result: PredictionResult = {
             'probabilities': probabilities,
             'predictions': predictions,
             'confidences': confidences,
         }
 
         return result
+
 
 def output_fn(prediction_result, content_type):
     # convert tensors to float lists

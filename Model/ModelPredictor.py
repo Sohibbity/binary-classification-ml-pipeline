@@ -1,33 +1,29 @@
 from datetime import datetime
+from pathlib import Path
 
 import pandas as pd
 import torch
 from pandas import DataFrame
+from torch import FloatTensor
 
 from Model.BinaryClassifierModel import BinaryClassifierModel
 
 
+
+"""
+Wrapper class for local inference
+To use for local debugging:
+    - Download .pth file of model for local storage 
+    - 
+"""
 class ModelPredictor:
     def __init__(self, model: BinaryClassifierModel):
         self.model = model
 
-    # Defensability Analysis:
-    # this is local rn but imagine it was an endpoint
-    # Issues that warrant a retry:
-    # network con to endppint dropped
-    # model cpu limit exceeded, (yes we're chunking but maybe this time our file has the same number of rows, BUT each row is more
-    # densley occuipied i.e if we had a synopsis col, previously col avg chars was 100, but we didnt realize this file its 5k char each, would
-    # blow up model cpu
-    # model inference is idempotent (all or nothing) so we retry 3x or drop from the entire batch of results
-    def run_inference(self, input_df: DataFrame):
+    def run_local_inference(self, tensors: FloatTensor):
         self.model.eval()
-
-        # Y tensor is already dropped in preprocessing step
-        # Remaining DF is only x tensors
-        x_tensor = torch.FloatTensor(input_df.values)
-
         with torch.no_grad():
-            outputs = self.model(x_tensor)  # generates raw, model output
+            outputs = self.model(tensors)  # generates raw, model output
 
             probabilities = torch.softmax(outputs, dim=1)  # Convert to probabilities
             predictions = torch.argmax(probabilities, dim=1)  # Get predicted class (0 or 1)
@@ -42,6 +38,16 @@ class ModelPredictor:
         results.index.name = 'input_row_id'
 
         return results
+
+    """
+    Creates model from stored .pth file
+    """
+    @classmethod
+    def from_path(cls, stored_model_file_path: Path):
+        model = BinaryClassifierModel()
+        model.load_state_dict(torch.load(stored_model_file_path))
+        return cls(model)
+
 
 
 
